@@ -1,0 +1,57 @@
+{
+  "candidate": {
+    "alignment_sample_points": 256,
+    "loss": "median_absolute_gr_error",
+    "name": "typewell_gr_robust_shift",
+    "prediction": "TVT_input + selected_shift",
+    "shift_grid": {
+      "maximum": 12.0,
+      "minimum": -12.0,
+      "step": 0.5
+    },
+    "tie_break": [
+      "smallest_absolute_shift",
+      "lowest_signed_shift"
+    ]
+  },
+  "confirm": {
+    "baseline": {
+      "mae": 0.0,
+      "rmse": 0.0
+    },
+    "candidate": {
+      "mae": 0.9209996285159134,
+      "rmse": 2.178442549110193
+    },
+    "mae_improvement": -0.9209996285159134,
+    "report_sha256": "6ade06d6deb494635528e0f0b503870fcfec8d907aedc2079f35cfccc1ef0189",
+    "scored_rows": 1308266,
+    "skipped_rows": 3783989,
+    "wells": 773
+  },
+  "data_fingerprint": "c7c598e03bd10bbaf998f026a856ac84b444b76fb2df2dd0ce024b93e8f6fac4",
+  "decision": {
+    "champion_manifest_changed": false,
+    "implementation_reverted": true,
+    "promoted": false,
+    "reason": "Candidate did not strictly improve the fixed TVT_input baseline."
+  },
+  "schema_version": 1,
+  "screen": {
+    "baseline": {
+      "mae": 0.0,
+      "rmse": 0.0
+    },
+    "candidate": {
+      "mae": 1.658036297823136,
+      "rmse": 3.5207644073361695
+    },
+    "deterministic_rerun": true,
+    "mae_improvement": -1.658036297823136,
+    "report_sha256": "81f4e8ccb4f604a9e029c49fa8bdc643ecf93a419fbffb630f67c6292e7aa3f8",
+    "scored_rows": 19891,
+    "skipped_rows": 56085,
+    "wells": 12
+  },
+  "seed": 1975
+}
