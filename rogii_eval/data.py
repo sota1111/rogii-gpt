@@ -5,9 +5,9 @@ from __future__ import annotations
 import csv
 import math
 import re
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
 
 HORIZONTAL_REQUIRED = ("MD", "X", "Y", "Z", "GR", "TVT_input")
 TYPEWELL_REQUIRED = ("TVT", "GR", "Geology")
