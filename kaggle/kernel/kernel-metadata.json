@@ -1,0 +1,14 @@
+{
+  "id": "sota1111/rogii-gpt-cli-baseline",
+  "title": "ROGII GPT CLI baseline",
+  "code_file": "submit.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": false,
+  "competition_sources": ["rogii-wellbore-geology-prediction"],
+  "dataset_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
