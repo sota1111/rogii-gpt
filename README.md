@@ -19,3 +19,18 @@ python3 -m rogii_eval.cli run \
 
 See [docs/evaluation.md](docs/evaluation.md) for schemas, split semantics,
 promotion/rollback rules, and the gates after local confirmation.
+
+## Kaggle submission
+
+The retained champion passes through finite `TVT_input` values and uses `0.0`
+where the competition test rows hide that field. The standalone Kaggle script
+uses only the Python standard library, does not depend on the working directory
+or `__file__`, and runs with internet disabled:
+
+```bash
+python3 -c "from pathlib import Path; from rogii_eval.submission import build_tvt_input_submission; build_tvt_input_submission(Path('data/sample_submission.csv'), Path('data/test'), Path('submission.csv'))"
+kaggle kernels push -p kaggle/kernel
+```
+
+See [docs/submission.md](docs/submission.md) for the screen/confirm contract and
+the recorded kernel/submission result.
