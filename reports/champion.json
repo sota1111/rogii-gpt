@@ -8,16 +8,19 @@
       "wells": 773
     },
     "model": "tvt_input",
-    "requires": [
-      "exec_compatibility",
-      "kaggle_validation"
-    ],
-    "status": "local_champion",
+    "requires": [],
+    "status": "kaggle_validated_champion",
     "submission": {
+      "artifact_sha256": "7a20b373f00d0d219db2d8e39f7c326fde98b93a5d812b227c70d6bf98fc1d57",
       "fallback": "0.0 when TVT_input is unavailable",
       "kernel": "sota1111/rogii-gpt-cli-baseline",
+      "kernel_version": 2,
+      "public_rank": 5714,
+      "public_score": 11551.955,
       "script": "kaggle/kernel/submit.py",
-      "source_commit": "the Git commit containing this manifest"
+      "source_commit": "d0dec26",
+      "submission_id": 54996914,
+      "submission_status": "COMPLETE"
     }
   },
   "data_fingerprint": "c7c598e03bd10bbaf998f026a856ac84b444b76fb2df2dd0ce024b93e8f6fac4",
