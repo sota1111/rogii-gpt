@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rogii-eval"
+version = "0.1.0"
+description = "Leak-safe local evaluation harness for ROGII well-log models"
+requires-python = ">=3.10"
+
+[project.scripts]
+rogii-eval = "rogii_eval.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["rogii_eval*"]
+
+[tool.ruff]
+line-length = 100
