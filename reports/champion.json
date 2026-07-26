@@ -1,0 +1,25 @@
+{
+  "champion": {
+    "metrics": {
+      "mae": 0.0,
+      "rmse": 0.0,
+      "rows": 1308266,
+      "skipped_rows": 3783989,
+      "wells": 773
+    },
+    "model": "tvt_input",
+    "requires": [
+      "exec_compatibility",
+      "kaggle_validation"
+    ],
+    "status": "local_champion"
+  },
+  "data_fingerprint": "c7c598e03bd10bbaf998f026a856ac84b444b76fb2df2dd0ce024b93e8f6fac4",
+  "evaluation": {
+    "kind": "grouped_oof",
+    "mode": "confirm"
+  },
+  "schema_version": 1,
+  "seed": 1975,
+  "updated_at": "2026-07-26T08:40:54.332375+00:00"
+}
