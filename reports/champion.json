@@ -28,6 +28,35 @@
     "kind": "grouped_oof",
     "mode": "confirm"
   },
+  "promotion_candidate": {
+    "configuration": {
+      "combined_feature_distance": true,
+      "gr_weight": 1.0,
+      "local_points": 1,
+      "max_distance": "unbounded",
+      "max_relative_md_extrapolation": "unbounded",
+      "name": "sot_2089_spatial_md_nearest",
+      "neighbor_count": 3,
+      "relative_md_weight": 1.0,
+      "spatial_weight": 1.0,
+      "z_weight": 1.0
+    },
+    "evaluation_artifact": "docs/experiments/sot-2090-spatial-gr-transfer.json",
+    "evaluation_artifact_sha256": "d92d4869e92d5672187b8ee66de056785595d471dd98b958bb0d3f0e532ed9d8",
+    "metrics": {
+      "mae": 59.54308431726219,
+      "rmse": 124.7133940056008,
+      "rows": 5092255,
+      "skipped_rows": 3783989,
+      "wells": 773
+    },
+    "model": "sot_2089_spatial_md_nearest",
+    "requires": [
+      "exec_compatibility",
+      "kaggle_validation"
+    ],
+    "status": "local_champion"
+  },
   "schema_version": 1,
   "seed": 1975,
   "updated_at": "2026-07-26T08:40:54.332375+00:00"

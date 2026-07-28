@@ -19,6 +19,22 @@ class WellProfile:
     md_span: float
 
 
+@dataclass(frozen=True)
+class TransferConfig:
+    """Small, serializable search space for cross-well transfer."""
+
+    name: str = "spatial_nearest"
+    neighbor_count: int = 3
+    spatial_weight: float = 1.0
+    gr_weight: float = 1.0
+    z_weight: float = 1.0
+    relative_md_weight: float = 1.0
+    local_points: int = 1
+    max_relative_md_extrapolation: float = math.inf
+    max_distance: float = math.inf
+    combined_feature_distance: bool = True
+
+
 def _finite(values: list[float]) -> list[float]:
     return [value for value in values if math.isfinite(value)]
 
@@ -101,9 +117,11 @@ class TransferPredictor:
         validation: WellProfile,
         neighbors: list[WellProfile],
         scales: dict[str, float],
+        config: TransferConfig | None = None,
     ) -> None:
         self.validation = validation
         self.scales = scales
+        self.config = config or TransferConfig(neighbor_count=len(neighbors))
         self.rows: list[tuple[WellProfile, list[dict[str, float]], list[float]]] = []
         for neighbor in neighbors:
             rows = sorted(iter_horizontal(neighbor.well), key=lambda row: row["MD"])
@@ -117,21 +135,42 @@ class TransferPredictor:
             index = bisect.bisect_left(positions, relative_md)
             for candidate_index in range(max(0, index - 2), min(len(rows), index + 3)):
                 candidate = rows[candidate_index]
-                feature_distance = _distance(row, candidate, self.scales, ("X", "Y", "Z", "GR"))
                 md_distance = abs(positions[candidate_index] - relative_md)
-                distance = feature_distance + md_distance
+                if self.config.combined_feature_distance:
+                    distance = _distance(
+                        row, candidate, self.scales, ("X", "Y", "Z", "GR")
+                    ) + self.config.relative_md_weight * md_distance
+                else:
+                    spatial = _distance(row, candidate, self.scales, ("X", "Y"))
+                    z_distance = _distance(row, candidate, self.scales, ("Z",))
+                    gr_distance = _distance(row, candidate, self.scales, ("GR",))
+                    distance = (
+                        self.config.spatial_weight * spatial
+                        + self.config.z_weight * z_distance
+                        + self.config.gr_weight * gr_distance
+                        + self.config.relative_md_weight * md_distance
+                    )
+                if md_distance > self.config.max_relative_md_extrapolation:
+                    continue
                 candidates.append((distance, candidate["TVT"], neighbor.well.well_id, md_distance))
-        if not candidates:
+        candidates.sort(key=lambda item: (item[0], item[2]))
+        usable = [
+            item
+            for item in candidates
+            if math.isfinite(item[0]) and item[0] <= self.config.max_distance
+        ][: self.config.local_points]
+        if not usable:
             return 0.0, {
                 "source_well": "zero_fallback",
                 "distance": math.inf,
                 "relative_md_distance": math.inf,
             }
-        distance, target, source, md_distance = min(candidates, key=lambda item: (item[0], item[2]))
-        return target, {
-            "source_well": source,
-            "distance": distance,
-            "relative_md_distance": md_distance,
+        weights = [1.0 / max(item[0], 1e-9) for item in usable]
+        prediction = sum(weight * item[1] for weight, item in zip(weights, usable)) / sum(weights)
+        return prediction, {
+            "source_well": usable[0][2],
+            "distance": usable[0][0],
+            "relative_md_distance": usable[0][3],
         }
 
 

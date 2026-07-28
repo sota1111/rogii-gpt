@@ -8,7 +8,13 @@ from pathlib import Path
 
 from rogii_eval.data import discover_wells, iter_horizontal
 from rogii_eval.evaluate import evaluate, update_champion
-from rogii_eval.transfer import TransferPredictor, profile, select_neighbors, training_scales
+from rogii_eval.transfer import (
+    TransferConfig,
+    TransferPredictor,
+    profile,
+    select_neighbors,
+    training_scales,
+)
 
 
 class EvaluateTest(unittest.TestCase):
@@ -93,6 +99,25 @@ class EvaluateTest(unittest.TestCase):
         path.write_text("\n".join(lines) + "\n")
         result = evaluate(self.wells, "screen", seed=42, screen_wells=8)
         self.assertTrue(math.isfinite(result.candidate["metrics"]["mae"]))
+
+    def test_transfer_configuration_is_recorded_and_enforces_extrapolation(self) -> None:
+        config = TransferConfig(
+            name="bounded_local",
+            neighbor_count=5,
+            local_points=3,
+            max_relative_md_extrapolation=0.0,
+        )
+        result = evaluate(
+            self.wells,
+            "screen",
+            seed=42,
+            screen_wells=8,
+            transfer_config=config,
+        )
+        self.assertEqual(result.candidate["name"], "bounded_local")
+        self.assertEqual(result.candidate["configuration"]["neighbor_count"], 5)
+        self.assertGreaterEqual(result.candidate["fallback_rows"], 0)
+        self.assertTrue(math.isfinite(result.candidate["metrics"]["rmse"]))
 
     def test_single_well_is_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "at least two wells"):
