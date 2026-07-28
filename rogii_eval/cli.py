@@ -18,6 +18,8 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument("--seed", type=int, default=SEED)
     run.add_argument("--screen-wells", type=int, default=12)
     run.add_argument("--folds", type=int, default=5)
+    run.add_argument("--neighbors", type=int, default=3)
+    run.add_argument("--min-mae-improvement", type=float, default=0.0)
     run.add_argument("--output", type=Path, required=True)
     run.add_argument("--champion-manifest", type=Path)
     validate = commands.add_parser("validate-submission")
@@ -38,13 +40,14 @@ def main(argv: list[str] | None = None) -> int:
         seed=args.seed,
         screen_wells=args.screen_wells,
         folds=args.folds,
+        neighbor_count=args.neighbors,
+        min_mae_improvement=args.min_mae_improvement,
     )
     write_result(result, args.output)
-    updated = (
-        update_champion(result, args.champion_manifest) if args.champion_manifest else False
-    )
+    updated = update_champion(result, args.champion_manifest) if args.champion_manifest else False
     baseline = result.baselines["tvt_input"]
     candidate = result.candidate["metrics"]
+    assert isinstance(candidate, dict)
     print(
         f"{result.mode}: wells={baseline.wells} rows={baseline.rows} "
         f"tvt_input_mae={baseline.mae:.6f} tvt_input_rmse={baseline.rmse:.6f} "

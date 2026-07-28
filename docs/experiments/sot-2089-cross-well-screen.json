@@ -1,0 +1,283 @@
+{
+  "baselines": {
+    "same_well_continuity": {
+      "mae": 4.245596538346585,
+      "rmse": 6.857754760279063,
+      "rows": 16755,
+      "skipped_rows": 11883,
+      "wells": 3
+    },
+    "tvt_input": {
+      "mae": 8022.756393315429,
+      "rmse": 9526.70900032063,
+      "rows": 16755,
+      "skipped_rows": 11883,
+      "wells": 3
+    },
+    "zero": {
+      "mae": 11255.336650552075,
+      "rmse": 11256.710883576363,
+      "rows": 16755,
+      "skipped_rows": 11883,
+      "wells": 3
+    }
+  },
+  "candidate": {
+    "mae_improvement": 7580.326448224411,
+    "metrics": {
+      "mae": 442.42994509101766,
+      "rmse": 529.3180431364945,
+      "rows": 16755,
+      "skipped_rows": 11883,
+      "wells": 3
+    },
+    "name": "cross_well_transfer",
+    "neighbor_count": 3,
+    "normalization": "training-well standard scales; relative MD per well"
+  },
+  "data_fingerprint": "c7c598e03bd10bbaf998f026a856ac84b444b76fb2df2dd0ce024b93e8f6fac4",
+  "mode": "screen",
+  "per_well": [
+    {
+      "mean_match_distance": 0.5382754091331043,
+      "metrics": {
+        "cross_well_transfer": {
+          "mae": 612.6589958325064,
+          "rmse": 618.7768901100884,
+          "rows": 5039,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "same_well_continuity": {
+          "mae": 1.6796963683268942,
+          "rmse": 2.5773010053765146,
+          "rows": 5039,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "tvt_input": {
+          "mae": 7895.348221869418,
+          "rmse": 9461.321472104217,
+          "rows": 5039,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "zero": {
+          "mae": 11300.338031355428,
+          "rmse": 11300.851795392622,
+          "rows": 5039,
+          "skipped_rows": 0,
+          "wells": 1
+        }
+      },
+      "neighbors": [
+        {
+          "gr_distance": 1.274802941235487,
+          "spatial_distance": 0.2878402321117517,
+          "well_id": "6a8fa194"
+        },
+        {
+          "gr_distance": 0.8900320191858979,
+          "spatial_distance": 1.3679224057090067,
+          "well_id": "2364716c"
+        },
+        {
+          "gr_distance": 1.200578100004008,
+          "spatial_distance": 1.4493430605769322,
+          "well_id": "7271dd80"
+        }
+      ],
+      "source_row_counts": {
+        "2364716c": 323,
+        "6a8fa194": 4633,
+        "7271dd80": 83
+      },
+      "target_used_for_fit_or_selection": false,
+      "training_wells": [
+        "96b7eea1",
+        "1fdbba44",
+        "7271dd80",
+        "6a8fa194",
+        "09053135",
+        "2364716c",
+        "ee288beb",
+        "4b831d20",
+        "f8662c22"
+      ],
+      "well_id": "06df5958"
+    },
+    {
+      "mean_match_distance": 0.7563985718998006,
+      "metrics": {
+        "cross_well_transfer": {
+          "mae": 648.5485659057438,
+          "rmse": 696.2109316482209,
+          "rows": 5432,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "same_well_continuity": {
+          "mae": 3.208506995581652,
+          "rmse": 4.86634303480552,
+          "rows": 5432,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "tvt_input": {
+          "mae": 7575.19872790869,
+          "rmse": 9210.949366701992,
+          "rows": 5432,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "zero": {
+          "mae": 11136.469456921945,
+          "rmse": 11137.859509744438,
+          "rows": 5432,
+          "skipped_rows": 0,
+          "wells": 1
+        }
+      },
+      "neighbors": [
+        {
+          "gr_distance": 1.4543536297542445,
+          "spatial_distance": 0.6358293383228603,
+          "well_id": "6a8fa194"
+        },
+        {
+          "gr_distance": 1.8391245518038337,
+          "spatial_distance": 0.9679752191478368,
+          "well_id": "2364716c"
+        },
+        {
+          "gr_distance": 1.5285784709857235,
+          "spatial_distance": 1.055773432625726,
+          "well_id": "7271dd80"
+        }
+      ],
+      "source_row_counts": {
+        "2364716c": 1104,
+        "6a8fa194": 4072,
+        "7271dd80": 256
+      },
+      "target_used_for_fit_or_selection": false,
+      "training_wells": [
+        "96b7eea1",
+        "1fdbba44",
+        "7271dd80",
+        "6a8fa194",
+        "09053135",
+        "2364716c",
+        "ee288beb",
+        "4b831d20",
+        "f8662c22"
+      ],
+      "well_id": "9c8375f7"
+    },
+    {
+      "mean_match_distance": 0.5768033722113141,
+      "metrics": {
+        "cross_well_transfer": {
+          "mae": 127.75449395289625,
+          "rmse": 144.97522002783674,
+          "rows": 6284,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "same_well_continuity": {
+          "mae": 7.199613303627987,
+          "rmse": 9.979763889249107,
+          "rows": 6284,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "tvt_input": {
+          "mae": 8511.798884468491,
+          "rmse": 9842.163875372262,
+          "rows": 6284,
+          "skipped_rows": 0,
+          "wells": 1
+        },
+        "zero": {
+          "mae": 11322.001933481859,
+          "rmse": 11323.24409711341,
+          "rows": 6284,
+          "skipped_rows": 0,
+          "wells": 1
+        }
+      },
+      "neighbors": [
+        {
+          "gr_distance": 1.684372781526197,
+          "spatial_distance": 0.5846664523480378,
+          "well_id": "09053135"
+        },
+        {
+          "gr_distance": 1.365389165050497,
+          "spatial_distance": 0.7066026249253795,
+          "well_id": "96b7eea1"
+        },
+        {
+          "gr_distance": 1.004976027987982,
+          "spatial_distance": 0.716929176080486,
+          "well_id": "ee288beb"
+        }
+      ],
+      "source_row_counts": {
+        "09053135": 5040,
+        "96b7eea1": 901,
+        "ee288beb": 343
+      },
+      "target_used_for_fit_or_selection": false,
+      "training_wells": [
+        "96b7eea1",
+        "1fdbba44",
+        "7271dd80",
+        "6a8fa194",
+        "09053135",
+        "2364716c",
+        "ee288beb",
+        "4b831d20",
+        "f8662c22"
+      ],
+      "well_id": "861e71df"
+    }
+  ],
+  "promoted": false,
+  "promotion_reason": "screen results cannot promote a champion",
+  "seed": 1975,
+  "split": {
+    "available_wells": 773,
+    "kind": "fixed_well_holdout",
+    "screen_wells": [
+      "06df5958",
+      "9c8375f7",
+      "861e71df",
+      "96b7eea1",
+      "1fdbba44",
+      "7271dd80",
+      "6a8fa194",
+      "09053135",
+      "2364716c",
+      "ee288beb",
+      "4b831d20",
+      "f8662c22"
+    ],
+    "train_wells": [
+      "96b7eea1",
+      "1fdbba44",
+      "7271dd80",
+      "6a8fa194",
+      "09053135",
+      "2364716c",
+      "ee288beb",
+      "4b831d20",
+      "f8662c22"
+    ],
+    "validation_wells": [
+      "06df5958",
+      "9c8375f7",
+      "861e71df"
+    ]
+  }
+}

@@ -10,6 +10,14 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .data import WellFiles, iter_horizontal, validate_typewell_rows
+from .transfer import (
+    TransferPredictor,
+    WellProfile,
+    continuity_predictions,
+    profile,
+    select_neighbors,
+    training_scales,
+)
 
 SEED = 1975
 
@@ -33,6 +41,7 @@ class Evaluation:
     promoted: bool
     promotion_reason: str
     data_fingerprint: str
+    per_well: list[dict[str, object]]
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -67,37 +76,67 @@ def _score(pairs: list[tuple[float, float]], wells: int, skipped_rows: int) -> M
     )
 
 
-def _mean_residual(wells: list[WellFiles]) -> float:
-    total = 0.0
-    rows = 0
-    for well in wells:
-        for row in iter_horizontal(well):
-            if not math.isfinite(row["TVT_input"]):
-                continue
-            total += row["TVT"] - row["TVT_input"]
-            rows += 1
-    if not rows:
-        raise ValueError("training split contains zero rows")
-    return total / rows
-
-
-def _evaluate_fold(train: list[WellFiles], validation: list[WellFiles]) -> tuple[
-    list[tuple[float, float]], list[tuple[float, float]], float, int
-]:
-    # This deliberately simple candidate proves fitted state comes only from other wells.
-    bias = _mean_residual(train)
-    baseline: list[tuple[float, float]] = []
-    candidate: list[tuple[float, float]] = []
+def _evaluate_fold(
+    train: list[WellFiles],
+    validation: list[WellFiles],
+    neighbor_count: int,
+    profiles: dict[str, WellProfile],
+) -> tuple[dict[str, list[tuple[float, float]]], list[dict[str, object]], int]:
+    train_profiles = [profiles[well.well_id] for well in train]
+    scales = training_scales(train_profiles)
+    pairs: dict[str, list[tuple[float, float]]] = {
+        "tvt_input": [],
+        "zero": [],
+        "same_well_continuity": [],
+        "cross_well_transfer": [],
+    }
+    reports: list[dict[str, object]] = []
     skipped = 0
     for well in validation:
         validate_typewell_rows(well)
-        for row in iter_horizontal(well):
-            if not math.isfinite(row["TVT_input"]):
-                skipped += 1
-                continue
-            baseline.append((row["TVT_input"], row["TVT"]))
-            candidate.append((row["TVT_input"] + bias, row["TVT"]))
-    return baseline, candidate, bias, skipped
+        validation_profile = profiles[well.well_id]
+        neighbors, neighbor_diagnostics = select_neighbors(
+            validation_profile, train_profiles, neighbor_count
+        )
+        predictor = TransferPredictor(validation_profile, neighbors, scales)
+        rows = list(iter_horizontal(well))
+        continuity = continuity_predictions(rows)
+        well_pairs: dict[str, list[tuple[float, float]]] = {name: [] for name in pairs}
+        source_counts: dict[str, int] = {}
+        distances: list[float] = []
+        for index, row in enumerate(rows):
+            target = row["TVT"]
+            champion = row["TVT_input"] if math.isfinite(row["TVT_input"]) else 0.0
+            skipped += int(not math.isfinite(row["TVT_input"]))
+            transfer, diagnostic = predictor.predict(row)
+            source = str(diagnostic["source_well"])
+            source_counts[source] = source_counts.get(source, 0) + 1
+            if math.isfinite(float(diagnostic["distance"])):
+                distances.append(float(diagnostic["distance"]))
+            predictions = {
+                "tvt_input": champion,
+                "zero": 0.0,
+                "same_well_continuity": continuity[index],
+                "cross_well_transfer": transfer,
+            }
+            for name, prediction in predictions.items():
+                pair = (prediction, target)
+                pairs[name].append(pair)
+                well_pairs[name].append(pair)
+        reports.append(
+            {
+                "well_id": well.well_id,
+                "training_wells": [item.well.well_id for item in train_profiles],
+                "target_used_for_fit_or_selection": False,
+                "neighbors": neighbor_diagnostics,
+                "source_row_counts": source_counts,
+                "mean_match_distance": sum(distances) / len(distances) if distances else None,
+                "metrics": {
+                    name: asdict(_score(items, 1, 0)) for name, items in well_pairs.items()
+                },
+            }
+        )
+    return pairs, reports, skipped
 
 
 def evaluate(
@@ -107,14 +146,20 @@ def evaluate(
     screen_wells: int = 12,
     folds: int = 5,
     min_mae_improvement: float = 0.0,
+    neighbor_count: int = 3,
 ) -> Evaluation:
-    """Run quick fixed holdout (screen) or full well-grouped OOF (confirm)."""
+    """Run a quick holdout or full leave-one-well-out evaluation."""
     ordered = stable_order(wells, seed)
     if len(ordered) < 2:
         raise ValueError("evaluation requires at least two wells")
-    baseline_pairs: list[tuple[float, float]] = []
-    candidate_pairs: list[tuple[float, float]] = []
-    biases: list[float] = []
+    profiles = {well.well_id: profile(well) for well in wells}
+    all_pairs: dict[str, list[tuple[float, float]]] = {
+        "tvt_input": [],
+        "zero": [],
+        "same_well_continuity": [],
+        "cross_well_transfer": [],
+    }
+    per_well: list[dict[str, object]] = []
     validation_ids: list[str] = []
     skipped_rows = 0
 
@@ -123,10 +168,12 @@ def evaluate(
         validation_count = max(1, len(sample) // 4)
         validation = sample[:validation_count]
         train = sample[validation_count:]
-        baseline, candidate, bias, skipped = _evaluate_fold(train, validation)
-        baseline_pairs.extend(baseline)
-        candidate_pairs.extend(candidate)
-        biases.append(bias)
+        fold_pairs, fold_reports, skipped = _evaluate_fold(
+            train, validation, neighbor_count, profiles
+        )
+        for name, items in fold_pairs.items():
+            all_pairs[name].extend(items)
+        per_well.extend(fold_reports)
         skipped_rows += skipped
         validation_ids.extend(well.well_id for well in validation)
         split: dict[str, object] = {
@@ -137,22 +184,22 @@ def evaluate(
             "validation_wells": validation_ids,
         }
     elif mode == "confirm":
-        actual_folds = min(max(2, folds), len(ordered))
         fold_ids: list[list[str]] = []
-        for fold in range(actual_folds):
-            validation = ordered[fold::actual_folds]
-            validation_set = {well.well_id for well in validation}
-            train = [well for well in ordered if well.well_id not in validation_set]
-            baseline, candidate, bias, skipped = _evaluate_fold(train, validation)
-            baseline_pairs.extend(baseline)
-            candidate_pairs.extend(candidate)
-            biases.append(bias)
+        for validation_well in ordered:
+            validation = [validation_well]
+            train = [well for well in ordered if well.well_id != validation_well.well_id]
+            fold_pairs, fold_reports, skipped = _evaluate_fold(
+                train, validation, neighbor_count, profiles
+            )
+            for name, items in fold_pairs.items():
+                all_pairs[name].extend(items)
+            per_well.extend(fold_reports)
             skipped_rows += skipped
             validation_ids.extend(well.well_id for well in validation)
             fold_ids.append([well.well_id for well in validation])
         split = {
-            "kind": "grouped_oof",
-            "folds": actual_folds,
+            "kind": "leave_one_well_out",
+            "folds": len(ordered),
             "fold_validation_wells": fold_ids,
             "all_wells_evaluated_once": sorted(validation_ids)
             == sorted(well.well_id for well in wells),
@@ -160,8 +207,12 @@ def evaluate(
     else:
         raise ValueError("mode must be screen or confirm")
 
-    baseline_metrics = _score(baseline_pairs, len(set(validation_ids)), skipped_rows)
-    candidate_metrics = _score(candidate_pairs, len(set(validation_ids)), skipped_rows)
+    scored = {
+        name: _score(items, len(set(validation_ids)), skipped_rows)
+        for name, items in all_pairs.items()
+    }
+    baseline_metrics = scored["tvt_input"]
+    candidate_metrics = scored["cross_well_transfer"]
     improvement = baseline_metrics.mae - candidate_metrics.mae
     promoted = mode == "confirm" and improvement > min_mae_improvement
     if mode != "confirm":
@@ -174,16 +225,22 @@ def evaluate(
         mode=mode,
         seed=seed,
         split=split,
-        baselines={"tvt_input": baseline_metrics},
+        baselines={
+            "tvt_input": baseline_metrics,
+            "zero": scored["zero"],
+            "same_well_continuity": scored["same_well_continuity"],
+        },
         candidate={
-            "name": "mean_bias_corrected_tvt_input",
+            "name": "cross_well_transfer",
             "metrics": asdict(candidate_metrics),
-            "fold_biases": biases,
+            "neighbor_count": neighbor_count,
+            "normalization": "training-well standard scales; relative MD per well",
             "mae_improvement": improvement,
         },
         promoted=promoted,
         promotion_reason=reason,
         data_fingerprint=_fingerprint(wells),
+        per_well=per_well,
     )
 
 
@@ -196,6 +253,10 @@ def update_champion(result: Evaluation, manifest: Path) -> bool:
     """Update only from a successful confirm; bootstrap the baseline if needed."""
     if result.mode != "confirm":
         return False
+    if manifest.exists():
+        existing = json.loads(manifest.read_text())
+        if existing.get("champion", {}).get("status") == "kaggle_validated_champion":
+            return False
     baseline = asdict(result.baselines["tvt_input"])
     if result.promoted:
         champion = {
@@ -220,7 +281,7 @@ def update_champion(result: Evaluation, manifest: Path) -> bool:
         "schema_version": 1,
         "seed": result.seed,
         "data_fingerprint": result.data_fingerprint,
-        "evaluation": {"kind": "grouped_oof", "mode": "confirm"},
+        "evaluation": {"kind": "leave_one_well_out", "mode": "confirm"},
         "champion": champion,
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
