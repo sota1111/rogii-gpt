@@ -5,12 +5,15 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import cast
 
 from .data import WellFiles, iter_horizontal, validate_typewell_rows
 from .transfer import (
+    TransferConfig,
     TransferPredictor,
     WellProfile,
     continuity_predictions,
@@ -42,6 +45,7 @@ class Evaluation:
     promotion_reason: str
     data_fingerprint: str
     per_well: list[dict[str, object]]
+    runtime_seconds: float
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -81,6 +85,7 @@ def _evaluate_fold(
     validation: list[WellFiles],
     neighbor_count: int,
     profiles: dict[str, WellProfile],
+    config: TransferConfig,
 ) -> tuple[dict[str, list[tuple[float, float]]], list[dict[str, object]], int]:
     train_profiles = [profiles[well.well_id] for well in train]
     scales = training_scales(train_profiles)
@@ -98,7 +103,7 @@ def _evaluate_fold(
         neighbors, neighbor_diagnostics = select_neighbors(
             validation_profile, train_profiles, neighbor_count
         )
-        predictor = TransferPredictor(validation_profile, neighbors, scales)
+        predictor = TransferPredictor(validation_profile, neighbors, scales, config)
         rows = list(iter_horizontal(well))
         continuity = continuity_predictions(rows)
         well_pairs: dict[str, list[tuple[float, float]]] = {name: [] for name in pairs}
@@ -147,8 +152,12 @@ def evaluate(
     folds: int = 5,
     min_mae_improvement: float = 0.0,
     neighbor_count: int = 3,
+    transfer_config: TransferConfig | None = None,
 ) -> Evaluation:
     """Run a quick holdout or full leave-one-well-out evaluation."""
+    started = time.monotonic()
+    config = transfer_config or TransferConfig(neighbor_count=neighbor_count)
+    neighbor_count = config.neighbor_count
     ordered = stable_order(wells, seed)
     if len(ordered) < 2:
         raise ValueError("evaluation requires at least two wells")
@@ -169,7 +178,7 @@ def evaluate(
         validation = sample[:validation_count]
         train = sample[validation_count:]
         fold_pairs, fold_reports, skipped = _evaluate_fold(
-            train, validation, neighbor_count, profiles
+            train, validation, neighbor_count, profiles, config
         )
         for name, items in fold_pairs.items():
             all_pairs[name].extend(items)
@@ -189,7 +198,7 @@ def evaluate(
             validation = [validation_well]
             train = [well for well in ordered if well.well_id != validation_well.well_id]
             fold_pairs, fold_reports, skipped = _evaluate_fold(
-                train, validation, neighbor_count, profiles
+                train, validation, neighbor_count, profiles, config
             )
             for name, items in fold_pairs.items():
                 all_pairs[name].extend(items)
@@ -231,16 +240,21 @@ def evaluate(
             "same_well_continuity": scored["same_well_continuity"],
         },
         candidate={
-            "name": "cross_well_transfer",
+            "name": config.name,
             "metrics": asdict(candidate_metrics),
-            "neighbor_count": neighbor_count,
+            "configuration": asdict(config),
             "normalization": "training-well standard scales; relative MD per well",
             "mae_improvement": improvement,
+            "fallback_rows": sum(
+                cast(dict[str, int], report["source_row_counts"]).get("zero_fallback", 0)
+                for report in per_well
+            ),
         },
         promoted=promoted,
         promotion_reason=reason,
         data_fingerprint=_fingerprint(wells),
         per_well=per_well,
+        runtime_seconds=time.monotonic() - started,
     )
 
 
