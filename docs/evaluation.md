@@ -34,20 +34,38 @@ python3 -m rogii_eval.cli run \
 
 `screen` uses a stable hash-selected 12-well subset and a well-level holdout. It
 is for fast schema, determinism, and direction checks only; it can never update
-the champion. `confirm` independently evaluates every available training well
-exactly once with grouped OOF folds. Any fitted state is learned only from the
-other wells. Both stages report MAE and RMSE for the `TVT_input` passthrough
-baseline and a deliberately simple mean-bias candidate.
+the champion. `confirm` performs literal leave-one-well-out: each available well
+is evaluated once, and its complete `TVT` column is excluded from normalization,
+neighbor selection, and prediction. Every fit/selection input comes from the
+other wells. Both stages use the same predictor and configuration.
 
-The JSON records the seed, exact split well ids, fold parameters, row/well
-counts, metrics, promotion decision, and a data fingerprint. Run reports are
-ignored by Git; only the compact champion manifest is versioned.
+The report compares four methods on the same rows and with the same MAE/RMSE:
+
+- current champion (`TVT_input`, with its documented zero fallback);
+- constant zero fallback;
+- same-well continuity (nearest finite `TVT_input` for missing rows);
+- cross-well transfer candidate.
+
+The transfer candidate normalizes X/Y/Z/GR using scales fitted on training wells,
+selects spatially nearest training wells, maps relative MD between wells, then
+chooses the closest local row using normalized X/Y/Z/GR plus relative-MD
+distance. Missing features are omitted from that row's distance. With no usable
+match it deterministically returns zero. One-well data is rejected because a
+leak-free training set cannot be formed.
+
+The JSON records the seed, exact split well ids, row/well counts, aggregate and
+per-well metrics, selected-neighbor spatial/GR distances, source-row counts,
+mean match distance, promotion decision, and a data fingerprint. The
+`target_used_for_fit_or_selection: false` contract is regression-tested by
+mutating a held-out target and proving selection and prediction are unchanged.
+Run reports are ignored by Git; only compact experiment evidence is versioned.
 
 ## Champion and rollback rules
 
-1. A candidate may become champion only after `confirm`, only when its MAE
-   strictly improves on the recorded baseline/champion threshold, and only when
-   screen and confirm agree on direction.
+1. A candidate passes the local promotion threshold only after `confirm`, only
+   when its MAE improves on the current champion by more than
+   `--min-mae-improvement` (default `0.0`), and only when screen and confirm
+   agree on direction.
 2. `reports/champion.json` calls the winner a **local champion**. Promotion to a
    production/Kaggle champion additionally requires execution-environment
    compatibility and an actual Kaggle submission result.
@@ -58,5 +76,9 @@ ignored by Git; only the compact champion manifest is versioned.
    compatibility check followed by Kaggle validation. A failure at either later
    gate leaves the manifest status local-only.
 
-This issue establishes the harness; the included bias candidate is a leakage
-test and reference comparison, not a claim about the final competition model.
+This issue establishes the harness; the transfer candidate is an evaluation
+reference, not a claim about the final competition model.
+An existing `kaggle_validated_champion` manifest is never overwritten by local
+evaluation. Non-promotion keeps the evaluation code, JSON result, and dated
+reason only; any integration of the candidate into `kaggle/kernel/submit.py`
+must be reverted.
