@@ -1,0 +1,75 @@
+{
+  "artifact": {
+    "kernel_id": "sota1111/rogii-gpt-cli-baseline",
+    "metadata_sha256": "425c0b477bf73f66d2ae27b4c4e4aa5defc0e6d7ab0a6eacfc03e1c9e9c6be74",
+    "output": "submission.csv",
+    "source": "kaggle/kernel/submit.py",
+    "source_sha256": "f225cd21aedf20dc9b3ed94cfbd7b00e68f3933033bdc2654c63bf8f9721bafd",
+    "submission_sha256": "aa8f50cbe0cfd8204e2452983f0a387ac03b69cdabaaf308e08c2234a1f5363b",
+    "wrapper_contract": "kernel/version/output"
+  },
+  "checks": {
+    "both_outputs_pass_schema": true,
+    "both_runs_exit_zero": true,
+    "competition_source_declared": true,
+    "dependencies_empty": true,
+    "deterministic_output": true,
+    "internet_disabled": true,
+    "matches_screened_candidate": true,
+    "screen_passed": true,
+    "standalone_source": true
+  },
+  "gate": "confirm",
+  "kaggle_submission_performed": false,
+  "promotion_eligible": true,
+  "reasons": [],
+  "recorded_at": "2026-08-03T15:50:31.740707+00:00",
+  "runs": [
+    {
+      "exit_code": 0,
+      "output_screen_status": "passed",
+      "output_sha256": "aa8f50cbe0cfd8204e2452983f0a387ac03b69cdabaaf308e08c2234a1f5363b",
+      "output_values": [
+        [
+          "well-a_0",
+          101.25
+        ],
+        [
+          "well-a_1",
+          0.0
+        ],
+        [
+          "well-b_0",
+          -4.5
+        ]
+      ],
+      "run": 1,
+      "stderr": "",
+      "stdout": "Wrote 3 rows to /tmp/tmppxetvulk/run-1/submission.csv"
+    },
+    {
+      "exit_code": 0,
+      "output_screen_status": "passed",
+      "output_sha256": "aa8f50cbe0cfd8204e2452983f0a387ac03b69cdabaaf308e08c2234a1f5363b",
+      "output_values": [
+        [
+          "well-a_0",
+          101.25
+        ],
+        [
+          "well-a_1",
+          0.0
+        ],
+        [
+          "well-b_0",
+          -4.5
+        ]
+      ],
+      "run": 2,
+      "stderr": "",
+      "stdout": "Wrote 3 rows to /tmp/tmppxetvulk/run-2/submission.csv"
+    }
+  ],
+  "schema_version": 1,
+  "status": "passed"
+}

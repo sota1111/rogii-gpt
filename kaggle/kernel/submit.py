@@ -7,10 +7,13 @@ without installing this repository, and may execute the source without defining
 
 import csv
 import math
+import os
 from pathlib import Path
 
-INPUT_ROOT = Path("/kaggle/input")
-OUTPUT_PATH = Path("/kaggle/working/submission.csv")
+INPUT_ROOT = Path(os.environ.get("KAGGLE_INPUT_ROOT", "/kaggle/input"))
+OUTPUT_PATH = Path(
+    os.environ.get("KAGGLE_OUTPUT_PATH", "/kaggle/working/submission.csv")
+)
 
 
 def find_unique(name):
