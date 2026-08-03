@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "issue": "SOT-2374",
+  "decision": {
+    "candidate": "tvt_input_zero_fallback",
+    "champion": "tvt_input",
+    "new_artifact": true,
+    "promotion": "exec_contract_refresh",
+    "reason": "The candidate semantics are unchanged, but the confirmed standalone source fingerprint differs from the source used by the previous submission."
+  },
+  "artifact": {
+    "path": "kaggle/kernel/submit.py",
+    "sha256": "f225cd21aedf20dc9b3ed94cfbd7b00e68f3933033bdc2654c63bf8f9721bafd",
+    "previous_submission_sha256": "a66d28e5759ecf13629ae1463897ef05091e37283ebfd740f0cfccec001d3a56",
+    "kernel_id": "sota1111/rogii-gpt-cli-baseline",
+    "metadata_path": "kaggle/kernel/kernel-metadata.json",
+    "metadata_sha256": "425c0b477bf73f66d2ae27b4c4e4aa5defc0e6d7ab0a6eacfc03e1c9e9c6be74",
+    "wrapper_contract": "kernel/version/output",
+    "expected_output": "submission.csv"
+  },
+  "verification": {
+    "screen": {
+      "issue": "SOT-2372",
+      "status": "passed",
+      "evidence_path": "docs/experiments/sot-2372-candidate-screen.json",
+      "evidence_sha256": "bdcc9d29d5ea8e4d78d3583059fcf939f89992a3f99aad62c4e2e3c471ecb121",
+      "candidate_sha256": "f7a527b54d4ef81143d8a7a6ff6529a94df672808df14a8ef61e1453df9d2c27"
+    },
+    "confirm": {
+      "issue": "SOT-2373",
+      "status": "passed",
+      "evidence_path": "docs/experiments/sot-2373-kernel-confirm.json",
+      "evidence_sha256": "7e82a2bdb178222c184212f96a832bee81d220e20801583ebf4e3ed0f7081e21",
+      "submission_sha256": "aa8f50cbe0cfd8204e2452983f0a387ac03b69cdabaaf308e08c2234a1f5363b",
+      "deterministic_runs": 2
+    }
+  },
+  "checks": {
+    "predecessors_complete": true,
+    "screen_passed": true,
+    "confirm_passed": true,
+    "fingerprints_recomputed": true,
+    "exec_compatible": true,
+    "no_rejected_changes": true,
+    "kaggle_submission_performed": false
+  }
+}
