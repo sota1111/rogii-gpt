@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "issue": "SOT-2371",
+  "submitted_at": "2026-08-03T16:14:36.433000Z",
+  "competition": "rogii-wellbore-geology-prediction",
+  "submission": {
+    "ref": "55216501",
+    "status": "SubmissionStatus.COMPLETE",
+    "public_score": 11551.955,
+    "description": "cycle-1 confirmed exec-contract artifact",
+    "wrapper": "scripts/ai/kaggle_targets_submit.sh"
+  },
+  "artifact": {
+    "kernel": "sota1111/rogii-gpt-cli-baseline",
+    "version": 3,
+    "output": "submission.csv",
+    "identity_sha256": "83a3558a975af659c843ff3ac9888a35f081cb116af1c43e17dce2dd174f5cb9",
+    "source_path": "kaggle/kernel/submit.py",
+    "source_sha256": "f225cd21aedf20dc9b3ed94cfbd7b00e68f3933033bdc2654c63bf8f9721bafd"
+  },
+  "verification": {
+    "screen_issue": "SOT-2372",
+    "confirm_issue": "SOT-2373",
+    "artifact_contract_issue": "SOT-2374",
+    "all_children_done": true,
+    "kernel_status": "KernelWorkerStatus.COMPLETE",
+    "fingerprint_gate_passed": true
+  }
+}
