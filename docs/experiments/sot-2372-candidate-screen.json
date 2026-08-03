@@ -1,0 +1,25 @@
+{
+  "checks": {
+    "candidate_schema": true,
+    "ids_match_sample_order": true,
+    "ids_nonempty_unique": true,
+    "row_count": true,
+    "sample_schema": true,
+    "tvt_numeric_finite_nonmissing": true,
+    "unique_sample_discovered": true
+  },
+  "evidence": {
+    "candidate_path": "tests/fixtures/candidate_screen/candidate.csv",
+    "candidate_rows": 3,
+    "candidate_sha256": "f7a527b54d4ef81143d8a7a6ff6529a94df672808df14a8ef61e1453df9d2c27",
+    "sample_path": "tests/fixtures/candidate_screen/input/competition/sample_submission.csv",
+    "sample_rows": 3
+  },
+  "gate": "screen",
+  "next_gate": "confirm",
+  "promotion_eligible": true,
+  "reasons": [],
+  "recorded_at": "2026-08-03T15:43:25.027793+00:00",
+  "schema_version": 1,
+  "status": "passed"
+}
